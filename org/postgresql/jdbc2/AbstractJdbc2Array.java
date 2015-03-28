@@ -762,13 +762,25 @@ public abstract class AbstractJdbc2Array
             }
         }
 
+        else if (getBaseTypeName().equals("jsonb")) {
+            // copied from handling of VARTEXT above.
+            Object[] oa = null;
+            ret = oa = (dims > 1 ? (Object[]) java.lang.reflect.Array.newInstance(String.class, dimsLength) : new String[count]);
+
+            for (; count > 0; count--)
+            {
+                Object v = input.get(index++);
+                oa[length++] = dims > 1 && v != null ? buildArray((PgArrayList) v, 0, -1) : v;
+            }
+        }
+
         // other datatypes not currently supported
         else
         {
             if (connection.getLogger().logDebug())
                 connection.getLogger().debug("getArrayImpl(long,int,Map) with " + getBaseTypeName());
 
-            throw org.postgresql.Driver.notImplemented(this.getClass(), "getArrayImpl(long,int,Map)");
+            throw org.postgresql.Driver.notImplemented(this.getClass(), "getArrayImpl(long,int,Map) (getBaseTypeName()=" + getBaseTypeName() + ")");
         }
 
         return ret;
